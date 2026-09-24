@@ -1,18 +1,38 @@
 public class Principal {
     void main() {
-        Algoritmo31 objeto = new Algoritmo31();
+        // É uma instância de uma classe
 
-        IO.print(objeto.getAloMundo());
-        objeto.printarNaTela();
+        Algoritmo31 objeto = new Algoritmo31();
+        /* classe obj at ope construtor */
+        IO.println(objeto.getAloMundo());
+        objeto.printarNaTela(); 
 
         Algoritmo32 objeto2 = new Algoritmo32();
-        String nome = IO.readln("Digite o seu nome:");
-        objeto2.mostrarSalaEco("Sophia");
-        objeto2.mostrarSalaEco("Thalita");
+        String nome = IO.readln("Digite seu nome: ");
+        objeto2.mostrarSalaEco("Gabriel");
+        objeto2.mostrarSalaEco(nome);
 
         Algoritmo32 objeto3 = new Algoritmo32();
-        IO.print(objeto3.mostrarSala("Sophia"));
+        IO.println(objeto3.mostrarSala("Gabriel"));
+        
+        Algoritmo33 alg33 = new Algoritmo33();
+        alg33.inserirChave(3);
+        IO.println(alg33.retornarChave());
+        IO.println(alg33.abrirPorta());
+    
+        Algoritmo34 alg34 = new Algoritmo34();
+        alg34.setPrimeiroNumero(10);
+        alg34.setSegundoNumero(20);
+        IO.println(alg34.getPrimeiroNumero());
+        IO.println(alg34.getSegundoNumero());
+        
+        Algoritmo35 alg35 = new Algoritmo35();
+        alg35.setModelo("Mercedes");
+        IO.println(alg35.getModelo());
+        alg35.setPlaca("SKZ-1602");
+        IO.println(alg35.getPlaca());   
+        alg35.setCavalos(133);
+        IO.println(alg35.getCavalos());   
 
     }
-    
 }
