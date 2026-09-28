@@ -43,5 +43,5 @@ public class Algoritmo49 {
         JOptionPane.showMessageDialog(null, resultado);
     }
 }
-        
+          
     
