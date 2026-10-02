@@ -1,463 +1,200 @@
 package br.com.romulo.curso.arquivo;
-
-import javax.swing.JOptionPane;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.JOptionPane;
 
-public class Algoritmo55{
+public class Algoritmo55 {
 
-    private static final String ARQUIVO = "ambientes.txt";
-
-    private static final DateTimeFormatter FORMATO =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-
-    private static final Map<String, String> ambientes =
-            new HashMap<>();
-
-
+    
+    private static Map<String, Ambiente> ambientes = new HashMap<>();
+    private static final String CAMINHO_ARQUIVO = "ambientes.txt";
+    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     public static void main(String[] args) {
+      
+        carregarDoArquivo();
 
-        
-        carregarArquivo();
+        int opcao = -1;
 
-        int opcao;
-
+      
         do {
+            try {
+                String menu = "=== CADASTRO DE DICIONÁRIO DE AMBIENTES ===\n\n"
+                        + "1 - Cadastrar Ambiente\n"
+                        + "2 - Listar Ambientes\n"
+                        + "3 - Pesquisar Ambiente\n"
+                        + "4 - Alterar Ambiente\n"
+                        + "5 - Excluir Ambiente\n"
+                        + "0 - Sair\n\n"
+                        + "Escolha uma opção:";
 
-            opcao = menu();
+                String entrada = JOptionPane.showInputDialog(null, menu, "Menu Principal", JOptionPane.QUESTION_MESSAGE);
 
-            switch (opcao) {
+                if (entrada == null) {
+                    opcao = 0;
+                } else {
+                    opcao = Integer.parseInt(entrada);
+                }
 
-                case 1:
-                    cadastrar();
-                    break;
+                switch (opcao) {
+                    case 1:
+                        cadastrar();
+                        break;
+                    case 2:
+                        listar();
+                        break;
+                    case 3:
+                        pesquisar();
+                        break;
+                    case 4:
+                        alterar();
+                        break;
+                    case 5:
+                        excluir();
+                        break;
+                    case 0:
+                        JOptionPane.showMessageDialog(null, "Saindo do programa. Até logo!");
+                        break;
+                    default:
+                        JOptionPane.showMessageDialog(null, "Opção inválida! Digite um número do menu.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                }
 
-                case 2:
-                    listar();
-                    break;
-
-                case 3:
-                    pesquisar();
-                    break;
-
-                case 4:
-                    excluir();
-                    break;
-
-                case 5:
-                    alterar();
-                    break;
-
-                case 0:
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "Programa encerrado. Até logo!"
-                    );
-                    break;
-
-                default:
-                    JOptionPane.showMessageDialog(
-                            null,
-                            "Opção inválida!",
-                            "Atenção",
-                            JOptionPane.WARNING_MESSAGE
-                    );
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Por favor, insira apenas números inteiros válidos.", "Erro", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Ocorreu um erro inesperado: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                
             }
 
         } while (opcao != 0);
     }
 
 
-    private static int menu() {
-
-        String texto = JOptionPane.showInputDialog(
-                null,
-                "===== CADASTRO DE AMBIENTES =====\n\n"
-                + "1 - Cadastrar\n"
-                + "2 - Listar\n"
-                + "3 - Pesquisar\n"
-                + "4 - Excluir\n"
-                + "5 - Alterar\n"
-                + "0 - Sair\n\n"
-                + "Escolha uma opção:",
-                "Menu Principal",
-                JOptionPane.QUESTION_MESSAGE
-        );
-
-        if (texto == null) {
-            return 0;
-        }
-
-        try {
-
-            return Integer.parseInt(texto.trim());
-
-        } catch (NumberFormatException e) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Digite apenas números!",
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE
-            );
-
-            return -1;
-        }
-    }
-
     private static void cadastrar() {
-
-        String chave = JOptionPane.showInputDialog(
-                "Digite a chave do ambiente:\n"
-                + "Exemplo: F07"
-        );
-
-        if (chave == null || chave.trim().isEmpty()) {
-            return;
-        }
+        String chave = JOptionPane.showInputDialog("Digite a chave do ambiente (ex: F07):");
+        if (chave == null || chave.trim().isEmpty()) return;
 
         chave = chave.trim().toUpperCase();
 
         if (ambientes.containsKey(chave)) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Essa chave já está cadastrada!",
-                    "Atenção",
-                    JOptionPane.WARNING_MESSAGE
-            );
-
+            JOptionPane.showMessageDialog(null, "Erro: Chave já cadastrada!", "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        String descricao = JOptionPane.showInputDialog(
-                "Digite a descrição do ambiente:"
-        );
+        String descricao = JOptionPane.showInputDialog("Digite a descrição (ex: Laboratório de Programação):");
+        if (descricao == null || descricao.trim().isEmpty()) return;
 
-        if (descricao == null || descricao.trim().isEmpty()) {
-            return;
-        }
+        Ambiente novoAmbiente = new Ambiente(chave, descricao);
+        ambientes.put(chave, novoAmbiente);
 
-        descricao = descricao.trim();
-
-        ambientes.put(chave, descricao);
-
-        
-        salvarArquivo();
-
-        JOptionPane.showMessageDialog(
-                null,
-                "Ambiente cadastrado com sucesso!"
-        );
+        salvarNoArquivo();
+        JOptionPane.showMessageDialog(null, "Ambiente cadastrado com sucesso!");
     }
 
-
     private static void listar() {
-
         if (ambientes.isEmpty()) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Nenhum ambiente cadastrado."
-            );
-
+            JOptionPane.showMessageDialog(null, "Nenhum ambiente cadastrado.");
             return;
         }
 
-        StringBuilder lista = new StringBuilder();
-
-        lista.append("===== AMBIENTES CADASTRADOS =====\n\n");
-
-        for (Map.Entry<String, String> ambiente
-                : ambientes.entrySet()) {
-
-            lista.append("Chave: ")
-                    .append(ambiente.getKey())
-                    .append("\n");
-
-            lista.append("Descrição: ")
-                    .append(ambiente.getValue())
-                    .append("\n\n");
+        StringBuilder lista = new StringBuilder("=== AMBIENTES CADASTRADOS ===\n\n");
+        for (Map.Entry<String, Ambiente> entry : ambientes.entrySet()) {
+            lista.append(entry.getValue().toString()).append("\n");
         }
 
-        JOptionPane.showMessageDialog(
-                null,
-                lista.toString(),
-                "Lista de Ambientes",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        JOptionPane.showMessageDialog(null, lista.toString());
     }
 
     private static void pesquisar() {
-
-        String chave = JOptionPane.showInputDialog(
-                "Digite a chave que deseja pesquisar:"
-        );
-
-        if (chave == null || chave.trim().isEmpty()) {
-            return;
-        }
+        String chave = JOptionPane.showInputDialog("Digite a chave para pesquisar:");
+        if (chave == null || chave.trim().isEmpty()) return;
 
         chave = chave.trim().toUpperCase();
+        Ambiente ambiente = ambientes.get(chave);
 
-        if (ambientes.containsKey(chave)) {
-
-            String descricao = ambientes.get(chave);
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Ambiente encontrado!\n\n"
-                    + "Chave: " + chave + "\n"
-                    + "Descrição: " + descricao
-            );
-
+        if (ambiente != null) {
+            JOptionPane.showMessageDialog(null, "Ambiente encontrado:\n\n" + ambiente.toString());
         } else {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Ambiente não encontrado!",
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(null, "Ambiente não encontrado!", "Aviso", JOptionPane.WARNING_MESSAGE);
         }
     }
-
-
-    private static void excluir() {
-
-        String chave = JOptionPane.showInputDialog(
-                "Digite a chave que deseja excluir:"
-        );
-
-        if (chave == null || chave.trim().isEmpty()) {
-            return;
-        }
-
-        chave = chave.trim().toUpperCase();
-
-        if (!ambientes.containsKey(chave)) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Ambiente não encontrado!",
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE
-            );
-
-            return;
-        }
-
-        int confirmacao = JOptionPane.showConfirmDialog(
-                null,
-                "Deseja realmente excluir o ambiente "
-                + chave + "?",
-                "Confirmar exclusão",
-                JOptionPane.YES_NO_OPTION
-        );
-
-        if (confirmacao == JOptionPane.YES_OPTION) {
-
-            ambientes.remove(chave);
-
-            salvarArquivo();
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Ambiente excluído com sucesso!"
-            );
-        }
-    }
-
 
     private static void alterar() {
-
-        String chave = JOptionPane.showInputDialog(
-                "Digite a chave do ambiente que deseja alterar:"
-        );
-
-        if (chave == null || chave.trim().isEmpty()) {
-            return;
-        }
+        String chave = JOptionPane.showInputDialog("Digite a chave do ambiente que deseja alterar:");
+        if (chave == null || chave.trim().isEmpty()) return;
 
         chave = chave.trim().toUpperCase();
 
         if (!ambientes.containsKey(chave)) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Ambiente não encontrado!",
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE
-            );
-
+            JOptionPane.showMessageDialog(null, "Chave não encontrada!", "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        String descricaoAtual = ambientes.get(chave);
+        String novaDescricao = JOptionPane.showInputDialog("Digite a nova descrição:");
+        if (novaDescricao == null || novaDescricao.trim().isEmpty()) return;
 
-        String novaDescricao = JOptionPane.showInputDialog(
-                "Descrição atual:\n"
-                + descricaoAtual
-                + "\n\nDigite a nova descrição:"
-        );
+        Ambiente ambiente = ambientes.get(chave);
+        ambiente.setDescricao(novaDescricao);
+        ambiente.setDataRegistro(LocalDateTime.now()); // Atualiza data de alteração
 
-        if (novaDescricao == null
-                || novaDescricao.trim().isEmpty()) {
-            return;
+        salvarNoArquivo();
+        JOptionPane.showMessageDialog(null, "Ambiente alterado com sucesso!");
+    }
+
+    private static void excluir() {
+        String chave = JOptionPane.showInputDialog("Digite a chave do ambiente para excluir:");
+        if (chave == null || chave.trim().isEmpty()) return;
+
+        chave = chave.trim().toUpperCase();
+
+        if (ambientes.remove(chave) != null) {
+            salvarNoArquivo();
+            JOptionPane.showMessageDialog(null, "Ambiente excluído com sucesso!");
+        } else {
+            JOptionPane.showMessageDialog(null, "Chave não encontrada!", "Erro", JOptionPane.ERROR_MESSAGE);
         }
-
-        novaDescricao = novaDescricao.trim();
-
-        ambientes.put(chave, novaDescricao);
-
-        
-        salvarArquivo();
-
-        JOptionPane.showMessageDialog(
-                null,
-                "Ambiente alterado com sucesso!"
-        );
     }
 
 
-    private static void salvarArquivo() {
+    private static void salvarNoArquivo() {
+        try (FileWriter fw = new FileWriter(CAMINHO_ARQUIVO, false);
+             PrintWriter pw = new PrintWriter(fw)) {
 
-        
-        LocalDateTime agora = LocalDateTime.now();
-
-        String dataHora = agora.format(FORMATO);
-
-        FileWriter writer = null;
-
-        try {
-
-            writer = new FileWriter(ARQUIVO);
-
-            writer.write(
-                    "# Atualizado em: "
-                    + dataHora
-                    + System.lineSeparator()
-            );
-
-            for (Map.Entry<String, String> ambiente
-                    : ambientes.entrySet()) {
-
-                writer.write(
-                        ambiente.getKey()
-                        + ";"
-                        + ambiente.getValue()
-                        + System.lineSeparator()
-                );
+            for (Ambiente env : ambientes.values()) {
+                pw.println(env.getChave() + ";" + env.getDescricao() + ";" + env.getDataFormatada());
             }
 
         } catch (IOException e) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Erro ao salvar o arquivo:\n"
-                    + e.getMessage(),
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE
-            );
-
-        } finally {
-
-            if (writer != null) {
-
-                try {
-
-                    writer.close();
-
-                } catch (IOException e) {
-
-                    System.out.println(
-                            "Erro ao fechar o arquivo."
-                    );
-                }
-            }
-
-            System.out.println(
-                    "Operação de gravação finalizada em: "
-                    + dataHora
-            );
+            JOptionPane.showMessageDialog(null, "Erro ao salvar no arquivo: " + e.getMessage(), "Erro de Arquivo", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-
-    private static void carregarArquivo() {
-
-        File arquivo = new File(ARQUIVO);
-
-        if (!arquivo.exists()) {
-
-            ambientes.put(
-                    "F07",
-                    "Laboratório de Programação Java"
-            );
-
-            ambientes.put(
-                    "B03",
-                    "Sala de Aula Padrão"
-            );
-
-            ambientes.put(
-                    "G09",
-                    "Oficina de Lanternagem e Pintura"
-            );
-
-            salvarArquivo();
-
-            return;
-        }
-
-        try (BufferedReader reader =
-                     new BufferedReader(
-                             new FileReader(ARQUIVO))) {
+    
+    private static void carregarDoArquivo() {
+        try (FileReader fr = new FileReader(CAMINHO_ARQUIVO);
+             BufferedReader br = new BufferedReader(fr)) {
 
             String linha;
+            while ((linha = br.readLine()) != null) {
+                String[] dados = linha.split(";");
+                if (dados.length == 3) {
+                    String chave = dados[0];
+                    String descricao = dados[1];
+                    LocalDateTime data = LocalDateTime.parse(dados[2], FORMATO_DATA);
 
-            while ((linha = reader.readLine()) != null) {
-
-                if (linha.startsWith("#")
-                        || linha.trim().isEmpty()) {
-                    continue;
-                }
-
-                String[] partes = linha.split(";", 2);
-
-                if (partes.length == 2) {
-
-                    String chave =
-                            partes[0].trim();
-
-                    String descricao =
-                            partes[1].trim();
-
-                    ambientes.put(
-                            chave,
-                            descricao
-                    );
+                    ambientes.put(chave, new Ambiente(chave, descricao, data));
                 }
             }
-
         } catch (IOException e) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Erro ao carregar o arquivo:\n"
-                    + e.getMessage(),
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE
-            );
+          
         }
     }
 }
-
